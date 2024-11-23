@@ -507,7 +507,7 @@ static HRESULT Compress(
               if (rp.GetNewPath(false, mainName, dest))
               {
                 needRename = true;
-                dest += ':';
+                dest.Add_Colon();
                 dest += ai.Name.Ptr((unsigned)(colonPos + 1));
                 break;
               }
@@ -704,7 +704,7 @@ static HRESULT Compress(
         }
         else
           realPath = us2fs(archivePath.GetFinalPath());
-        if (outStreamSpec->Create(realPath, false))
+        if (outStreamSpec->Create_NEW(realPath))
         {
           tempFiles.Paths.Add(realPath);
           isOK = true;
@@ -763,7 +763,7 @@ static HRESULT Compress(
       outStreamSpec2 = new COutFileStream;
       sfxOutStream = outStreamSpec2;
       const FString realPath = us2fs(archivePath.GetFinalPath());
-      if (!outStreamSpec2->Create(realPath, false))
+      if (!outStreamSpec2->Create_NEW(realPath))
         return errorInfo.SetFromLastError("cannot open file", realPath);
     }
 
@@ -856,7 +856,7 @@ static HRESULT Compress(
 
   if (!updateCallbackSpec->AreAllFilesClosed())
   {
-    errorInfo.Message = "There are unclosed input file:";
+    errorInfo.Message = "There are unclosed input files:";
     errorInfo.FileNames = updateCallbackSpec->_openFiles_Paths;
     return E_FAIL;
   }
@@ -1331,12 +1331,14 @@ HRESULT UpdateArchive(
   if (options.StdInMode)
   {
     CDirItem di;
-    di.ClearBase();
+    // di.ClearBase();
+    // di.Size = (UInt64)(Int64)-1;
+    if (!di.SetAs_StdInFile())
+      return GetLastError_noZero_HRESULT();
     di.Name = options.StdInFileName;
-    di.Size = (UInt64)(Int64)-1;
-    di.SetAsFile();
-    NTime::GetCurUtc_FiTime(di.MTime);
-    di.CTime = di.ATime = di.MTime;
+    // di.Attrib_IsDefined = false;
+    // NTime::GetCurUtc_FiTime(di.MTime);
+    // di.CTime = di.ATime = di.MTime;
     dirItems.Items.Add(di);
   }
   else
@@ -1604,7 +1606,23 @@ HRESULT UpdateArchive(
       
       if (!MyMoveFile(tempPath, us2fs(arcPath)))
       {
-        errorInfo.SetFromLastError("cannot move the file", tempPath);
+        errorInfo.SystemError = ::GetLastError();
+        errorInfo.Message = "cannot move the file";
+        if (errorInfo.SystemError == ERROR_INVALID_PARAMETER)
+        {
+          NFind::CFileInfo fi;
+          if (fi.Find(tempPath) &&
+              fi.Size > (UInt32)(Int32)-1)
+          {
+            // bool isFsDetected = false;
+            // if (NSystem::Is_File_LimitedBy_4GB(us2fs(arcPath), isFsDetected) || !isFsDetected)
+            {
+              errorInfo.Message.Add_LF();
+              errorInfo.Message += "Archive file size exceeds 4 GB";
+            }
+          }
+        }
+        errorInfo.FileNames.Add(tempPath);
         errorInfo.FileNames.Add(us2fs(arcPath));
         return errorInfo.Get_HRESULT_Error();
       }
@@ -1626,6 +1644,8 @@ HRESULT UpdateArchive(
 
 
   #if defined(_WIN32) && !defined(UNDER_CE)
+
+Z7_DIAGNOSTIC_IGNORE_CAST_FUNCTION
   
   if (options.EMailMode)
   {
@@ -1695,7 +1715,7 @@ HRESULT UpdateArchive(
       Z7_WIN_MapiMessageW m;
       memset(&m, 0, sizeof(m));
       m.nFileCount = files.Size();
-      m.lpFiles = &files.Front();
+      m.lpFiles = files.NonConstData();
       
       const UString addr (options.EMailAddress);
       Z7_WIN_MapiRecipDescW rec;
@@ -1756,7 +1776,7 @@ HRESULT UpdateArchive(
       MapiMessage m;
       memset(&m, 0, sizeof(m));
       m.nFileCount = files.Size();
-      m.lpFiles = &files.Front();
+      m.lpFiles = files.NonConstData();
       
       const AString addr (GetAnsiString(options.EMailAddress));
       MapiRecipDesc rec;

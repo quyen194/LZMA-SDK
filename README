@@ -1,6 +1,9 @@
 HISTORY of the LZMA SDK
 -----------------------
 
+24.08          2024-11-24
+-------------------------
+
 23.01          2023-06-20
 -------------------------
 - 7-Zip now can use new ARM64 filter for compression to 7z and xz archives.
