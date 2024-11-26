@@ -33,6 +33,8 @@ namespace NExtractionDialog
 
 class CExtractDialog: public NWindows::NControl::CModalDialog
 {
+  NWindows::NControl::CDialogChildControl _label;
+
   #ifdef Z7_NO_REGISTRY
   NWindows::NControl::CDialogChildControl _path;
   #else

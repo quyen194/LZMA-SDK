@@ -22,6 +22,8 @@
 #include "ExtractDialogRes.h"
 #include "ExtractRes.h"
 
+#include "7zip/Bundles/SFXWin/Configs.h"
+
 using namespace NWindows;
 using namespace NFile;
 using namespace NName;
@@ -137,6 +139,11 @@ void CExtractDialog::GetButton_Bools(UINT id, CBoolPair &b1, CBoolPair &b2)
 
 bool CExtractDialog::OnInit()
 {
+  if (!g_Configs.szExtractPathTitle.IsEmpty())
+  {
+    SetText(g_Configs.szExtractPathTitle.GetBuf());
+  }
+
   #ifdef Z7_LANG
   {
     UString s;
@@ -187,6 +194,7 @@ bool CExtractDialog::OnInit()
 
   #endif
 
+  _label.Attach(GetItem(IDT_EXTRACT_EXTRACT_TO));
   _path.Attach(GetItem(IDC_EXTRACT_PATH));
 
   UString pathPrefix = DirPath;
@@ -207,7 +215,11 @@ bool CExtractDialog::OnInit()
     ShowItem_Bool(IDE_EXTRACT_NAME, false);
 
   #endif
-
+  
+  if (!g_Configs.szExtractPathLabel.IsEmpty())
+  {
+    _label.SetText(g_Configs.szExtractPathLabel);
+  }
   _path.SetText(pathPrefix);
 
   #ifndef Z7_NO_REGISTRY

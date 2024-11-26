@@ -1,0 +1,13 @@
+# Format Style Options - Created with Clang Power Tools
+---
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BasedOnStyle: Google
+BinPackArguments: false
+BinPackParameters: false
+BreakInheritanceList: BeforeColon
+BreakConstructorInitializersBeforeComma: false
+BreakStringLiterals: false
+IndentCaseLabels: true
+SpaceAfterCStyleCast: true
+...

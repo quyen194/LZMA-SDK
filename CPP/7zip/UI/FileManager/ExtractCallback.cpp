@@ -31,7 +31,6 @@
 #ifndef Z7_NO_CRYPTO
 #include "PasswordDialog.h"
 #endif
-#include "MemDialog.h"
 #include "PropertyName.h"
 
 using namespace NWindows;
