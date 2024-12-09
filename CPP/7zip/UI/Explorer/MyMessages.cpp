@@ -9,14 +9,23 @@
 
 #include "../FileManager/LangUtils.h"
 
+#include "7zip/Bundles/SFXWin/Configs.h"
+
 using namespace NWindows;
 
 extern bool g_DisableUserQuestions;
 
 void ShowErrorMessage(HWND window, LPCWSTR message)
 {
+  UString title = L"7-Zip";
+
+  if (!g_Configs.szErrorTitle.IsEmpty())
+  {
+    title = g_Configs.szErrorTitle;
+  }
+
   if (!g_DisableUserQuestions)
-    ::MessageBoxW(window, message, L"7-Zip", MB_OK | MB_ICONSTOP);
+    ::MessageBoxW(window, message, title.GetBuf(), MB_OK | MB_ICONSTOP);
 }
 
 void ShowErrorMessageHwndRes(HWND window, UInt32 resID)

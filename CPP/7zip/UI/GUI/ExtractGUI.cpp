@@ -30,6 +30,8 @@
 
 #include "../FileManager/PropertyNameRes.h"
 
+#include "7zip/Bundles/SFXWin/Configs.h"
+
 using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
@@ -272,6 +274,11 @@ HRESULT ExtractGUI(
   }
   
   UString title = LangString(options.TestMode ? IDS_PROGRESS_TESTING : IDS_PROGRESS_EXTRACTING);
+
+  if (!g_Configs.szTitle.IsEmpty())
+  {
+    title = g_Configs.szTitle;
+  }
 
   extracter.Title = title;
   extracter.ExtractCallbackSpec = extractCallback;
